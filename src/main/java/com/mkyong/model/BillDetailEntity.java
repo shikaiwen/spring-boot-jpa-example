@@ -13,9 +13,7 @@ public class BillDetailEntity {
     private Integer no;
 
 
-//    @Column(name="BILL_NO")
-    @Transient
-    private Integer billNo;
+
 
     @Column(name="RESP_NUM")
     private Integer respNum;
@@ -29,9 +27,14 @@ public class BillDetailEntity {
     @Column(name="DISCOUNT_RATE")
     private Double discountRate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BILL_NO")
+//    @Transient
     private BillEntity billEntity;
+
+//        @Column(name="BILL_NO")
+//    @Transient
+//    private Integer billNo;
 
     public Integer getNo() {
         return no;
@@ -41,13 +44,13 @@ public class BillDetailEntity {
         this.no = no;
     }
 
-    public Integer getBillNo() {
-        return billNo;
-    }
-
-    public void setBillNo(Integer billNo) {
-        this.billNo = billNo;
-    }
+//    public Integer getBillNo() {
+//        return billNo;
+//    }
+//
+//    public void setBillNo(Integer billNo) {
+//        this.billNo = billNo;
+//    }
 
     public Integer getRespNum() {
         return respNum;
@@ -89,4 +92,6 @@ public class BillDetailEntity {
     public void setBillEntity(BillEntity billEntity) {
         this.billEntity = billEntity;
     }
+
+
 }

@@ -6,8 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +25,7 @@ import static java.lang.System.exit;
 //@EntityScan(
 //        basePackageClasses = { SpringBootConsoleApplication.class, Jsr310JpaConverters.class }
 //)
+@Transactional
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
@@ -44,6 +49,11 @@ public class Application implements CommandLineRunner {
     @Autowired
     SellMstDao sellMstDao;
 
+    @Resource
+    com.mkyong.onetomany1.MainService onetomany1Service;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
 
     public static void main(String[] args) throws Exception {
 //        URLClassLoader classLoader = (URLClassLoader)Thread.currentThread().getContextClassLoader();
@@ -54,6 +64,48 @@ public class Application implements CommandLineRunner {
 //        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
         SpringApplication.run(Application.class, args);
+    }
+
+
+
+    @Transactional
+    @Override
+    public void run(String... args) throws Exception {
+
+        onetomany1Service.test1();
+
+        if(true){
+            return;
+        }
+
+
+        System.out.println("DATASOURCE = " + dataSource);
+
+        System.out.println("\n1.findAll()...");
+        for (Customer customer : customerRepository.findAll()) {
+            System.out.println(customer);
+        }
+
+        System.out.println("\n2.findByEmail(String email)...");
+        for (Customer customer : customerRepository.findByEmail("222@yahoo.com")) {
+            System.out.println(customer);
+        }
+
+        System.out.println("\n3.findByDate(Date date)...");
+        for (Customer customer : customerRepository.findByDate(sdf.parse("2017-02-12"))) {
+            System.out.println(customer);
+        }
+
+        // For Stream, need @Transactional
+        System.out.println("\n4.findByEmailReturnStream(@Param(\"email\") String email)...");
+        try (Stream<Customer> stream = customerRepository.findByEmailReturnStream("333@yahoo.com")) {
+            stream.forEach(x -> System.out.println(x));
+        }
+
+
+        System.out.println("Done!");
+
+        exit(0);
     }
 
 
@@ -70,7 +122,7 @@ public class Application implements CommandLineRunner {
 
 
     public void testSellMst(){
-//        BillDetailEntity entity = billDetailRepository.findOne(1);
+//        OneToMany1BillDetailEntity entity = billDetailRepository.findOne(1);
 //        System.out.println(entity.getRespDate().getTime());
 
         SellMstEntity entity = new SellMstEntity();
@@ -109,7 +161,7 @@ public class Application implements CommandLineRunner {
         billDetailEntity.setRespNum(100);
         billDetailEntity.setRespDate(new Date());
         billDetailEntity.setDiscountRate(0.76);
-        billDetailEntity.setBillNo(be.getNo());
+//        billDetailEntity.setBillNo(be.getNo());
         billDetailEntity.setBillEntity(be);
 
         List<BillDetailEntity> detailList = new ArrayList<>();
@@ -119,7 +171,7 @@ public class Application implements CommandLineRunner {
 
         BillEntity resultBean = billEntityRespository.save(be);
         System.out.println(resultBean);
-//        BillDetailEntity entity = billDetailRepository.findOne(1);
+//        OneToMany1BillDetailEntity entity = billDetailRepository.findOne(1);
 //        System.out.println(entity.getRespDate().getTime());
     }
 
@@ -140,7 +192,7 @@ public class Application implements CommandLineRunner {
         billDetailEntity.setRespNum(100);
         billDetailEntity.setRespDate(new Date());
         billDetailEntity.setDiscountRate(0.76);
-        billDetailEntity.setBillNo(be.getNo());
+//        billDetailEntity.setBillNo(be.getNo());
 
         billDetailEntity.setBillEntity(be);
 
@@ -150,66 +202,6 @@ public class Application implements CommandLineRunner {
     }
 
 
-    @Transactional(readOnly = true)
-    @Override
-    public void run(String... args) throws Exception {
 
-//        BillEntity entity = new BillEntity();
-//        entity.setProductCode("SL0001");
-//        billEntityRespository.save(entity);
-
-//        testBillDetail();
-//        testSellMstDetail();
-
-//        testSellMst();
-
-//        testSaveBillJoin();
-//        queryBill();
-
-//        saveBillDetail();
-
-        findSellMst();
-        if(true){
-            return;
-        }
-
-
-
-        System.out.println("DATASOURCE = " + dataSource);
-
-        System.out.println("\n1.findAll()...");
-        for (Customer customer : customerRepository.findAll()) {
-            System.out.println(customer);
-        }
-
-        System.out.println("\n2.findByEmail(String email)...");
-        for (Customer customer : customerRepository.findByEmail("222@yahoo.com")) {
-            System.out.println(customer);
-        }
-
-        System.out.println("\n3.findByDate(Date date)...");
-        for (Customer customer : customerRepository.findByDate(sdf.parse("2017-02-12"))) {
-            System.out.println(customer);
-        }
-
-        // For Stream, need @Transactional
-        System.out.println("\n4.findByEmailReturnStream(@Param(\"email\") String email)...");
-        try (Stream<Customer> stream = customerRepository.findByEmailReturnStream("333@yahoo.com")) {
-            stream.forEach(x -> System.out.println(x));
-        }
-
-        //System.out.println("....................");
-        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        //Date from = sdf.parse("2017-02-15");
-        //Date to = sdf.parse("2017-02-17");
-
-        //for (Customer customer : customerRepository.findByDateBetween(from, to)) {
-        //    System.out.println(customer);
-        //}
-
-        System.out.println("Done!");
-
-        exit(0);
-    }
 
 }
